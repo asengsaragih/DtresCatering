@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -27,6 +28,7 @@ import static com.android.dtrescatering.base.MethodeFunction.shortToast;
 public class SigninActivity extends AppCompatActivity {
 
     private TextView mSignUpTextView;
+    private Button mSignInButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +36,7 @@ public class SigninActivity extends AppCompatActivity {
         setContentView(R.layout.activity_signin);
 
         mSignUpTextView = findViewById(R.id.textView_signin_new_account);
+        mSignInButton = findViewById(R.id.button_signin);
 
         mButtonClick();
 
@@ -45,6 +48,13 @@ public class SigninActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getApplicationContext(), SignupActivity.class));
+            }
+        });
+
+        mSignInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
             }
         });
     }
