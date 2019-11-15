@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "956783760236",
+    "firebase_url": "https://dtres-catering.firebaseio.com",
+    "project_id": "dtres-catering",
+    "storage_bucket": "dtres-catering.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956783760236:android:4c4cfcee48f5346c895949",
+        "android_client_info": {
+          "package_name": "com.android.dtrescatering"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "956783760236-rpdod4i087tcfjh0cqda0f34iuluc6jg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.dtrescatering",
+            "certificate_hash": "681d5df040819310bda9d24c6581904a83a41a71"
+          }
+        },
+        {
+          "client_id": "956783760236-938cc0356b2rc9gnav9ru4nmgqm06jni.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaf8umaE5ARIZOHWaXXcvBbUwOmmO5jhs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "956783760236-938cc0356b2rc9gnav9ru4nmgqm06jni.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
