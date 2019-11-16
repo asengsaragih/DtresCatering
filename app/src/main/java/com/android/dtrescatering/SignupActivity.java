@@ -99,7 +99,7 @@ public class SignupActivity extends AppCompatActivity {
                                     startActivity(new Intent(getApplicationContext(), SigninActivity.class));
                                 }
 
-                                databaseReference = FirebaseDatabase.getInstance().getReference(mNamaUser);
+                                databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(mNamaUser);
                                 User user = new User(nama, email, password, rePassword, phone);
                                 databaseReference.setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override

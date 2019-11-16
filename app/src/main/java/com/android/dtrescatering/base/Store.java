@@ -3,21 +3,27 @@ package com.android.dtrescatering.base;
 import com.google.firebase.database.Exclude;
 
 public class Store {
-    String nama, deskripsi, gambar, key;
+    String nama;
+    String deskripsi;
+    String jamBuka, jamTutup;
+    String key;
 
     public Store() {
+
     }
 
-    public Store(String nama, String deskripsi, String gambar) {
+    public Store(String nama, String deskripsi, String jamBuka, String jamTutup) {
         this.nama = nama;
         this.deskripsi = deskripsi;
-        this.gambar = gambar;
+        this.jamBuka = jamBuka;
+        this.jamTutup = jamTutup;
     }
 
     @Exclude
     public String getKey() {
         return key;
     }
+
     @Exclude
     public void setKey(String key) {
         this.key = key;
@@ -39,11 +45,19 @@ public class Store {
         this.deskripsi = deskripsi;
     }
 
-    public String getGambar() {
-        return gambar;
+    public String getJamBuka() {
+        return jamBuka;
     }
 
-    public void setGambar(String gambar) {
-        this.gambar = gambar;
+    public void setJamBuka(String jamBuka) {
+        this.jamBuka = jamBuka;
+    }
+
+    public String getJamTutup() {
+        return jamTutup;
+    }
+
+    public void setJamTutup(String jamTutup) {
+        this.jamTutup = jamTutup;
     }
 }

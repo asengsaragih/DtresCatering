@@ -91,15 +91,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkStoreExist() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference check = reference.child(userId).child("store");
+        DatabaseReference check = reference.child("Users").child(userId).child("store");
+
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Mengecek Toko");
+        progressDialog.show();
 
         check.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ProgressDialog progressDialog = new ProgressDialog(getApplicationContext());
-                progressDialog.setTitle("Mengecek Toko");
-                progressDialog.show();
-
                 if (dataSnapshot.exists()) {
                     progressDialog.dismiss();
                     startActivity(new Intent(getApplicationContext(), StoreActivity.class));
