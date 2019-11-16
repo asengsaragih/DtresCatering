@@ -128,7 +128,6 @@ public class RegisterStoreActivity extends AppCompatActivity {
         mDaftarTokoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                mSaveStore();
                 uploadFile();
             }
         });
@@ -187,46 +186,4 @@ public class RegisterStoreActivity extends AppCompatActivity {
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         return mime.getExtensionFromMimeType(cR.getType(uri));
     }
-
-//    private void mSaveStore() {
-//        if (mImageUri != null) {
-//            final StorageReference storageReference = mStorageRef.child(System.currentTimeMillis()+ "."+ getFileExtention(mImageUri));
-//            storageReference.putFile(mImageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>()
-//            {
-//                @Override
-//                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception
-//                {
-//                    if (!task.isSuccessful())
-//                    {
-//                        throw task.getException();
-//                    }
-//                    return storageReference.getDownloadUrl();
-//                }
-//            }).addOnCompleteListener(new OnCompleteListener<Uri>()
-//            {
-//                @Override
-//                public void onComplete(@NonNull Task<Uri> task)
-//                {
-//                    if (task.isSuccessful()) {
-//                        Uri downloadUri = task.getResult();
-//
-//                        Store upload = new Store(
-//                                mNamaTokoEditText.getText().toString().trim(),
-//                                mDeskripsiTokoEditText.getText().toString().trim(),
-//                                downloadUri.toString()
-//                        );
-//
-//                        String dataID = mDatabaseRef.push().getKey();
-//                        mDatabaseRef.child(dataID).setValue(upload);
-//
-//                        Toast.makeText(getApplicationContext(), "Berhasil meyimpan Toko", Toast.LENGTH_LONG).show();
-//                        Intent intent = new Intent(getApplicationContext(), StoreActivity.class);
-//                        startActivity(intent);
-//                    } else {
-//                        Toast.makeText(getApplicationContext(), "Gagal Upload : " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            });
-//        }
-//    }
 }

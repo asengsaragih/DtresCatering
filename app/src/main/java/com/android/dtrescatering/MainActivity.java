@@ -3,6 +3,7 @@ package com.android.dtrescatering;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,8 +11,16 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 
 import com.android.dtrescatering.base.Session;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageListener;
+
+import static com.android.dtrescatering.base.MethodeFunction.longToast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private Session session;
+
+    private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +83,36 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_store:
-                startActivity(new Intent(getApplicationContext(), RegisterStoreActivity.class));
+                checkStoreExist();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void checkStoreExist() {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference check = reference.child(userId).child("store");
+
+        check.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ProgressDialog progressDialog = new ProgressDialog(getApplicationContext());
+                progressDialog.setTitle("Mengecek Toko");
+                progressDialog.show();
+
+                if (dataSnapshot.exists()) {
+                    progressDialog.dismiss();
+                    startActivity(new Intent(getApplicationContext(), StoreActivity.class));
+                } else {
+                    progressDialog.dismiss();
+                    startActivity(new Intent(getApplicationContext(), RegisterStoreActivity.class));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                throw databaseError.toException(); // don't ignore errors
+            }
+        });
     }
 }

@@ -3,6 +3,7 @@ package com.android.dtrescatering;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -77,17 +78,24 @@ public class SignupActivity extends AppCompatActivity {
             longToast(getApplicationContext(), "Field Tidak Boleh Kosong");
         } else {
 
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Membuat User Baru");
+            progressDialog.show();
+
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (!task.isSuccessful()) {
+                                progressDialog.dismiss();
                                 longToast(getApplicationContext(), "Gagal Daftar " + task.getException());
                             } else {
                                 if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                                     mNamaUser = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                    progressDialog.dismiss();
                                     startActivity(new Intent(getApplicationContext(), SigninActivity.class));
                                 } else {
+                                    progressDialog.dismiss();
                                     startActivity(new Intent(getApplicationContext(), SigninActivity.class));
                                 }
 
@@ -96,6 +104,8 @@ public class SignupActivity extends AppCompatActivity {
                                 databaseReference.setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
+                                        progressDialog.dismiss();
+                                        longToast(getApplicationContext(), "Berhasil Daftar");
                                         Intent intent = new Intent(getApplicationContext(), SigninActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         startActivity(intent);
