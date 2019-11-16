@@ -1,28 +1,33 @@
 package com.android.dtrescatering;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.dtrescatering.base.Item;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +40,45 @@ public class StoreActivity extends AppCompatActivity {
     private RecyclerView mStoreItemRecycleView;
     private FloatingActionButton mAddItemFloatingButton;
     private View mEmptyView;
+    private ItemStoreAdapter mAdapter;
+
+    private ArrayList<Item> mData;
+    private ArrayList<String> mDataId;
+
+    private ActionMode mActionMode;
+
+    private DatabaseReference mDatabase;
+    private ChildEventListener childEventListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            mData.add(dataSnapshot.getValue(Item.class));
+            mDataId.add(dataSnapshot.getKey());
+            mAdapter.updateEmptyView();
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            int pos = mDataId.indexOf(dataSnapshot.getKey());
+            mData.set(pos, dataSnapshot.getValue(Item.class));
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+            int pos = mDataId.indexOf(dataSnapshot.getKey());
+            mDataId.remove(pos);
+            mData.remove(pos);
+            mAdapter.updateEmptyView();
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) { }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) { }
+    };
 
     private DatabaseReference mDatabaseRef;
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -50,7 +94,87 @@ public class StoreActivity extends AppCompatActivity {
 
         mButtonClicked();
 
+        mShowItem();
+
     }
+
+    private void mShowItem() {
+        mData = new ArrayList<>();
+        mDataId = new ArrayList<>();
+        mDatabase = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");;
+        mDatabase.addChildEventListener(childEventListener);
+
+        mStoreItemRecycleView.setHasFixedSize(true);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mStoreItemRecycleView.setLayoutManager(linearLayoutManager);
+
+        DividerItemDecoration divider = new DividerItemDecoration(this, linearLayoutManager.getOrientation());
+        mStoreItemRecycleView.addItemDecoration(divider);
+
+        mAdapter = new ItemStoreAdapter(this, mData, mDataId, mEmptyView, new ItemStoreAdapter.ClickHandler() {
+            @Override
+            public void onItemClick(int position) {
+                if (mActionMode != null) {
+                    mAdapter.toggleSelection(mDataId.get(position));
+                    if (mAdapter.selectionCount() == 0)
+                        mActionMode.finish();
+                    else
+                        mActionMode.invalidate();
+                    return;
+                }
+
+                String item = mData.get(position).toString();
+                Toast.makeText(getApplicationContext(), item, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public boolean onItemLongClick(int position) {
+                if (mActionMode != null) return false;
+
+                mAdapter.toggleSelection(mDataId.get(position));
+//                mActionMode = StoreActivity.this.startSupportActionMode(mActionModeCallback);
+                return true;
+            }
+        });
+
+        mStoreItemRecycleView.setAdapter(mAdapter);
+    }
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.catalog_context, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            mode.setTitle(String.valueOf(mAdapter.selectionCount()));
+//            menu.findItem(R.id.action_edit).setVisible(mAdapter.selectionCount() == 1);
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+//                case R.id.action_edit:
+//                    editPet();
+//                    return true;
+//
+//                case R.id.action_delete:
+//                    deletePet();
+//                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+            mAdapter.resetSelection();
+        }
+    };
 
     private void mButtonClicked() {
         mAddItemFloatingButton.setOnClickListener(new View.OnClickListener() {
