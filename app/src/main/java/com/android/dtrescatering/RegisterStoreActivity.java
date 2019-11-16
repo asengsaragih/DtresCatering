@@ -64,12 +64,12 @@ public class RegisterStoreActivity extends AppCompatActivity {
 
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-    FirebaseStorage storage;
-    StorageReference storageReference;
+//    FirebaseStorage storage;
+//    StorageReference storageReference;
 
     private DatabaseReference mDatabaseRef;
-    private StorageReference mStorageRef;
-    private StorageTask mUploadTask;
+//    private StorageReference mStorageRef;
+//    private StorageTask mUploadTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +151,7 @@ public class RegisterStoreActivity extends AppCompatActivity {
 
     private void saveStore() {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("store");
+        final String dataID = mDatabaseRef.push().getKey();
 
         Store store = new Store(
                 mNamaTokoEditText.getText().toString().trim(),
@@ -164,7 +165,7 @@ public class RegisterStoreActivity extends AppCompatActivity {
         progressDialog.setTitle("Membuat Toko");
         progressDialog.show();
 
-        mDatabaseRef.setValue(store).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mDatabaseRef.child(dataID).setValue(store).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 progressDialog.dismiss();
