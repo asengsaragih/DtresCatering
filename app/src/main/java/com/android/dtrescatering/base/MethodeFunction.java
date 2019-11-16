@@ -11,4 +11,8 @@ public class MethodeFunction {
     public static void shortToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
+
+    public void accessStorage() {
+
+    }
 }
