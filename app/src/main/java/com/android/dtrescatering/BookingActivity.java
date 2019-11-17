@@ -19,6 +19,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +54,9 @@ public class BookingActivity extends AppCompatActivity {
     private TextView mOngkirTextView;
     private TextView mSubTotalTextView;
     private ImageView mItemImageView;
+    private RadioButton mCODRadioButton;
+    private RadioButton mTransferRadioButton;
+    private RadioGroup mPembayaranRadioGroup;
     private int qty = 50;
 
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -72,8 +77,20 @@ public class BookingActivity extends AppCompatActivity {
         mOngkirTextView = findViewById(R.id.textView_booking_ongkir);
         mSubTotalTextView = findViewById(R.id.textView_booking_sub_total);
         mItemImageView = findViewById(R.id.imageView_booking_imgage);
+        mCODRadioButton = findViewById(R.id.radioButton);
+        mTransferRadioButton = findViewById(R.id.radioButton2);
+        mPembayaranRadioGroup = findViewById(R.id.radioGroup);
 
         mShowData(savedInstanceState);
+    }
+
+    private String mMetodePembayaran() {
+        String pembayaran;
+        if (mCODRadioButton.isChecked()) {
+            return pembayaran = " Pembayaran Melalui Cash On Delivery ";
+        } else {
+            return pembayaran = " Pembayaran Melalui Transfer. ";
+        }
     }
 
     private void initialPrice(String harga) {
@@ -210,7 +227,7 @@ public class BookingActivity extends AppCompatActivity {
                         String namaBarang = mNamaTextView.getText().toString();
                         String total = String.valueOf(qty);
 
-                        final String message = "Saya pesan " + namaBarang + " sebanyak " + total + " porsi. dikirim ke : " + alamat + "\n\n Penerima : " + namaPemesan;
+                        final String message = "Saya pesan " + namaBarang + " sebanyak " + total + " porsi. dikirim ke : " + alamat + mMetodePembayaran() + "\n\n Penerima : " + namaPemesan;
 
                         Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
                         intent.putExtra("sms_body",message);
