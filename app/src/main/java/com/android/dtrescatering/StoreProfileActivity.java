@@ -33,7 +33,7 @@ public class StoreProfileActivity extends AppCompatActivity {
     private TextView mDescTextView;
     private TextView mJamTextView;
 
-    private ItemStoreAdapter mAdapter;
+    private StoreItemDetailAdapter mAdapter;
 
     private ArrayList<Item> mData;
     private ArrayList<String> mDataId;
@@ -81,12 +81,6 @@ public class StoreProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_store_profile);
 
-//        private RecyclerView mRecycleViewDetailStore;
-//        private View mEmptyView;
-//        private TextView mNamaTextView;
-//        private TextView mDescTextView;
-//        private TextView mJamTextView;
-
         mRecycleViewDetailStore = findViewById(R.id.recycleView_store_detail_items);
         mEmptyView = findViewById(R.id.textView_store_detail_emptyview);
         mNamaTextView = findViewById(R.id.textView_store_detail_nama);
@@ -111,7 +105,7 @@ public class StoreProfileActivity extends AppCompatActivity {
         DividerItemDecoration divider = new DividerItemDecoration(this, linearLayoutManager.getOrientation());
         mRecycleViewDetailStore.addItemDecoration(divider);
 
-        mAdapter = new ItemStoreAdapter(StoreProfileActivity.this, mData, mDataId, mEmptyView, new ItemStoreAdapter.ClickHandler() {
+        mAdapter = new StoreItemDetailAdapter(StoreProfileActivity.this, mData, mDataId, mEmptyView, new StoreItemDetailAdapter.ClickHandler() {
             @Override
             public void onItemClick(int position) {
                 String item = mDataId.get(position).toString();
