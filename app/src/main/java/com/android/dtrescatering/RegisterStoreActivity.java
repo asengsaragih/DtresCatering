@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
@@ -55,6 +56,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.android.dtrescatering.base.MethodeFunction.longToast;
+import static com.android.dtrescatering.base.MethodeFunction.shortToast;
 
 public class RegisterStoreActivity extends AppCompatActivity {
 
@@ -153,6 +155,16 @@ public class RegisterStoreActivity extends AppCompatActivity {
     }
 
     private void saveStore() {
+        String nama = mNamaTokoEditText.getText().toString().trim();
+        String desc = mDeskripsiTokoEditText.getText().toString().trim();
+        String open = mOpenTokoEditText.getText().toString().trim();
+        String close = mClosedTokoEditText.getText().toString().trim();
+
+        if (TextUtils.isEmpty(nama) || TextUtils.isEmpty(desc) || TextUtils.isEmpty(open) || TextUtils.isEmpty(close)) {
+            shortToast(getApplicationContext(), "Form TIdak Boleh Kosong");
+            return;
+        }
+
         mDatabaseRef = FirebaseDatabase.getInstance().getReference("Stores");
         final String dataID = mDatabaseRef.push().getKey();
 //        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("store");

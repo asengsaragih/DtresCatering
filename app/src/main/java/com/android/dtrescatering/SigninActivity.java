@@ -81,7 +81,7 @@ public class SigninActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
 
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-
+            shortToast(getApplicationContext(), "Form Tidak Boleh Kosong");
         } else {
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Logged In");

@@ -188,7 +188,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_logout:
                 session.setLoggedin(false);
                 FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(this, SigninActivity.class));
+                Intent intent = new Intent(getApplicationContext(), SigninActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+//                startActivity(new Intent(this, SigninActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
