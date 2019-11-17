@@ -130,17 +130,11 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new StoresAdapter(this, mData, mDataId, mEmptyView, new StoresAdapter.ClickHandler() {
             @Override
             public void onItemClick(int position) {
-                if (mActionMode != null) {
-                    mAdapter.toggleSelection(mDataId.get(position));
-                    if (mAdapter.selectionCount() == 0)
-                        mActionMode.finish();
-                    else
-                        mActionMode.invalidate();
-                    return;
-                }
+                String item = mDataId.get(position).toString();
 
-                String item = mData.get(position).toString();
-                Toast.makeText(getApplicationContext(), item, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, StoreProfileActivity.class);
+                intent.putExtra("storeId", item);
+                startActivity(intent);
             }
 
             @Override
@@ -150,6 +144,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mStoreRecycleView.setAdapter(mAdapter);
+    }
+
+    private void mDetailStore(Store store) {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Stores");
     }
 
     private void mShowCarousel() {
