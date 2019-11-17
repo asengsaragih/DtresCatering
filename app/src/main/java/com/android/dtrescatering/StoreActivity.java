@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.dtrescatering.base.Item;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -304,8 +305,8 @@ public class StoreActivity extends AppCompatActivity {
         final String dataID = mDatabaseRef.push().getKey();
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Upload Item");
-        progressDialog.show();
+//        progressDialog.setTitle("Upload Item");
+//        progressDialog.show();
 
         builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
             @Override
@@ -315,22 +316,45 @@ public class StoreActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
 
                         //kodignan tambah gambar
-                        StorageReference ref = reference.child("Items/" + name.getText().toString() + System.currentTimeMillis() + "." + getFileExtention(mImageUri));
+                        final StorageReference ref = reference.child("Items/" + name.getText().toString() + System.currentTimeMillis() + "." + getFileExtention(mImageUri));
                         ref.putFile(mImageUri)
+//                        ref.getDownloadUrl()
+//                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                                    @Override
+//                                    public void onSuccess(Uri uri) {
+//                                        String downloadUrl = uri.toString();
+//                                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items").child(dataID);
+//                                        Map<String, Object> values = new HashMap<String, Object>();
+//                                        values.put("gambar", uri.toString());
+//
+//                                        databaseReference.updateChildren(values);
+//
+//                                        longToast(getApplicationContext(), "Berhasil Membuat Item");
+//                                    }
+//                                })
+//                                .addOnFailureListener(new OnFailureListener() {
+//                                    @Override
+//                                    public void onFailure(@NonNull Exception e) {
+//                                        longToast(getApplicationContext(), "Gagal Upload : " + e.toString());
+//                                    }
+//                                });
+//                                .ad
                                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items").child(dataID);
 
-                                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items").child(dataID);
-
-                                        Map<String, Object> values = new HashMap<String, Object>();
-                                        values.put("gambar", name.getText().toString() + System.currentTimeMillis() + "." + getFileExtention(mImageUri));
-
-                                        databaseReference.updateChildren(values);
-
-                                        progressDialog.dismiss();
-
-//                                        longToast(getApplicationContext(), "Berhasil Membuat Toko");
+                                        Task<Uri> result = taskSnapshot.getStorage().getDownloadUrl();
+                                        result.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                            @Override
+                                            public void onSuccess(Uri uri) {
+                                                String imageUrl = uri.toString();
+                                                Map<String, Object> values = new HashMap<String, Object>();
+                                                values.put("gambar", imageUrl);
+                                                databaseReference.updateChildren(values);
+                                                progressDialog.dismiss();
+                                            }
+                                        });
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {

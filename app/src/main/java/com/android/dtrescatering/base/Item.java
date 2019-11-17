@@ -3,7 +3,25 @@ package com.android.dtrescatering.base;
 import com.google.firebase.database.Exclude;
 
 public class Item {
-    private String nama, harga, key;
+    private String nama;
+    private String harga;
+    private String key;
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    private String image;
+
+    public Item(String nama, String harga, String image) {
+        this.nama = nama;
+        this.harga = harga;
+        this.image = image;
+    }
 
     public Item() {
     }
