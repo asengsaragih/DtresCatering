@@ -185,6 +185,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_store:
                 checkStoreExist();
                 break;
+            case R.id.action_logout:
+                session.setLoggedin(false);
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(this, SigninActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
