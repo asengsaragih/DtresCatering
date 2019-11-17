@@ -4,13 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.ActionMode;
+import android.view.ActionMode.Callback;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +29,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,6 +136,7 @@ public class StoreActivity extends AppCompatActivity {
 
                 mAdapter.toggleSelection(mDataId.get(position));
 //                mActionMode = StoreActivity.this.startSupportActionMode(mActionModeCallback);
+                mActionMode = StoreActivity.this.startSupportActionMode(mActionModeCallback);
                 return true;
             }
         });
@@ -151,20 +154,20 @@ public class StoreActivity extends AppCompatActivity {
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             mode.setTitle(String.valueOf(mAdapter.selectionCount()));
-//            menu.findItem(R.id.action_edit).setVisible(mAdapter.selectionCount() == 1);
+            menu.findItem(R.id.action_edit).setVisible(mAdapter.selectionCount() == 1);
             return true;
         }
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
-//                case R.id.action_edit:
-//                    editPet();
-//                    return true;
-//
-//                case R.id.action_delete:
-//                    deletePet();
-//                    return true;
+                case R.id.action_edit:
+                    editItem();
+                    return true;
+
+                case R.id.action_delete:
+                    deleteItem();
+                    return true;
             }
             return false;
         }
@@ -175,6 +178,12 @@ public class StoreActivity extends AppCompatActivity {
             mAdapter.resetSelection();
         }
     };
+
+    private void editItem() {
+    }
+
+    private void deleteItem() {
+    }
 
     private void mButtonClicked() {
         mAddItemFloatingButton.setOnClickListener(new View.OnClickListener() {

@@ -3,4 +3,6 @@
     <string name="signin_welcome">Selamat Datang Di D\'Tres Catering</string>
     <string name="signin_failed">Gagal Masuk</string>
     <string name="loading">Loading</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Hapus</string>
 </resources>
