@@ -91,7 +91,7 @@ public class StoreProfileActivity extends AppCompatActivity {
         mShowHeader(savedInstanceState);
     }
 
-    private void mShowItem(Bundle bundle) {
+    private void mShowItem(final Bundle bundle) {
         mData = new ArrayList<>();
         mDataId = new ArrayList<>();
         mDatabase = FirebaseDatabase.getInstance().getReference("Stores").child(getStoreId(bundle)).child("items");
@@ -108,7 +108,15 @@ public class StoreProfileActivity extends AppCompatActivity {
         mAdapter = new StoreItemDetailAdapter(StoreProfileActivity.this, mData, mDataId, mEmptyView, new StoreItemDetailAdapter.ClickHandler() {
             @Override
             public void onItemClick(int position) {
-                String item = mDataId.get(position).toString();
+                String itemId = mDataId.get(position).toString();
+                String storeId = getStoreId(bundle);
+
+                Intent intent = new Intent(StoreProfileActivity.this, BookingActivity.class);
+
+                intent.putExtra("itemId", itemId);
+                intent.putExtra("storeId", storeId);
+
+                startActivity(intent);
             }
 
             @Override
