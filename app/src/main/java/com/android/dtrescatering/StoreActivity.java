@@ -43,7 +43,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -306,55 +305,58 @@ public class StoreActivity extends AppCompatActivity {
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Upload Item");
-        progressDialog.show();
 
         builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialogInterface, int i) {
-                mDatabaseRef.child(dataID).setValue(new Item(name.getText().toString(), price.getText().toString())).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        final StorageReference ref = reference.child("Items/" + name.getText().toString() + System.currentTimeMillis() + "." + getFileExtention(mImageUri));
-                        ref.putFile(mImageUri)
-                                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                    @Override
-                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items").child(dataID);
+                if (mImageUri == null || name == null || price == null) {
+                    shortToast(getApplicationContext(), "Seluruh Form Harus Diisi");
+                    dialogInterface.dismiss();
+                    return;
+                } else {
+                    progressDialog.show();
+                    mDatabaseRef.child(dataID).setValue(new Item(name.getText().toString(), price.getText().toString())).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            final StorageReference ref = reference.child("Items/" + name.getText().toString() + System.currentTimeMillis() + "." + getFileExtention(mImageUri));
+                            ref.putFile(mImageUri)
+                                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                            final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items").child(dataID);
 
-                                        Task<Uri> result = taskSnapshot.getStorage().getDownloadUrl();
-                                        result.addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                            @Override
-                                            public void onSuccess(Uri uri) {
-                                                String imageUrl = uri.toString();
-                                                Map<String, Object> values = new HashMap<String, Object>();
-                                                values.put("gambar", imageUrl);
-                                                databaseReference.updateChildren(values);
-                                                progressDialog.dismiss();
-                                                shortToast(getApplicationContext(), "Berhasil Upload Data");
-                                            }
-                                        });
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        progressDialog.dismiss();
-                                        longToast(getApplicationContext(), "Gagal Upload : " + e.toString());
-                                    }
-                                })
-                                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                                    @Override
-                                    public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
-                                        double progress = (100.0 * taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
-                                        progressDialog.setMessage("Uploading " + (int)progress + "%");
-                                    }
-                                });
-
-                        //------------------------
-
-                        dialogInterface.dismiss();
-                    }
-                });
+                                            Task<Uri> result = taskSnapshot.getStorage().getDownloadUrl();
+                                            result.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+                                                    String imageUrl = uri.toString();
+                                                    Map<String, Object> values = new HashMap<String, Object>();
+                                                    values.put("gambar", imageUrl);
+                                                    databaseReference.updateChildren(values);
+                                                    progressDialog.dismiss();
+                                                    shortToast(getApplicationContext(), "Berhasil Upload Data");
+                                                }
+                                            });
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            progressDialog.dismiss();
+                                            longToast(getApplicationContext(), "Gagal Upload : " + e.toString());
+                                        }
+                                    })
+                                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                                            double progress = (100.0 * taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                                            progressDialog.setMessage("Uploading " + (int)progress + "%");
+                                        }
+                                    });
+                            dialogInterface.dismiss();
+                        }
+                    });
+                }
             }
         });
 
@@ -391,7 +393,6 @@ public class StoreActivity extends AppCompatActivity {
         try {
             startActivityForResult(chooserIntent, PICK_IMAGE_REQUEST);
         } catch (android.content.ActivityNotFoundException e) {
-//                methodeFunction.toastMessage(RegisterStoreActivity.this, getString(R.string.warning_open_file_chooser));
 
         }
     }

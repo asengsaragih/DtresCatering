@@ -13,10 +13,12 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +31,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,10 +51,10 @@ public class BookingActivity extends AppCompatActivity {
     private TextView mTotalTextView;
     private TextView mOngkirTextView;
     private TextView mSubTotalTextView;
-    private int qty = 0;
+    private ImageView mItemImageView;
+    private int qty = 50;
 
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-    private String username = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +71,16 @@ public class BookingActivity extends AppCompatActivity {
         mTotalTextView = findViewById(R.id.textView_booking_total_price);
         mOngkirTextView = findViewById(R.id.textView_booking_ongkir);
         mSubTotalTextView = findViewById(R.id.textView_booking_sub_total);
+        mItemImageView = findViewById(R.id.imageView_booking_imgage);
 
         mShowData(savedInstanceState);
+    }
+
+    private void initialPrice(String harga) {
+        int total = Integer.valueOf(harga) * qty;
+        mTotalTextView.setText(String.valueOf(total));
+        int subtotal = total + 5000;
+        mSubTotalTextView.setText(String.valueOf(subtotal));
     }
 
     private void mShowData(final Bundle savedInstanceState) {
@@ -83,11 +94,14 @@ public class BookingActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String harga = dataSnapshot.child("harga").getValue(String.class);
                 String nama = dataSnapshot.child("nama").getValue(String.class);
+                String gambar = dataSnapshot.child("gambar").getValue(String.class);
 
                 mNamaTextView.setText(nama);
                 mHargaTextView.setText(harga);
+                Picasso.get().load(gambar).into(mItemImageView);
 
                 mButtonQtyClicked(harga, savedInstanceState);
+                initialPrice(harga);
             }
 
             @Override
@@ -115,8 +129,8 @@ public class BookingActivity extends AppCompatActivity {
         mKurangButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (qty <= 0) {
-                    shortToast(getApplicationContext(), "Tidak Bisa dibawah 0");
+                if (qty <= 50) {
+                    shortToast(getApplicationContext(), "Tidak Bisa dibawah 50");
                 } else {
                     qty = qty - 1;
                     int hargaitem = Integer.parseInt(mTotalTextView.getText().toString()) - Integer.parseInt(harga);
@@ -173,22 +187,41 @@ public class BookingActivity extends AppCompatActivity {
     }
 
     private void sendMessage(Bundle bundle) {
+        String alamat = mAlamatEditText.getText().toString().trim();
+        if (TextUtils.isEmpty(alamat)) {
+            shortToast(getApplicationContext(), "Alamat Harus Diisi");
+            return;
+        }
+
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(getStoreId(bundle));
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String phone = dataSnapshot.child("phone").getValue(String.class);
-                Uri uri = Uri.parse("smsto:" + phone);
+                final Uri uri = Uri.parse("smsto:" + phone);
 
-                String alamat = mAlamatEditText.getText().toString();
-                String namaBarang = mNamaTextView.getText().toString();
-                String total = String.valueOf(qty);
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(userId);
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                String message = "Saya pesan " + namaBarang + " sebanyak " + total + " porsi. dikirim ke : " + alamat;
+                        String namaPemesan = dataSnapshot.child("nama").getValue(String.class);
+                        String alamat = mAlamatEditText.getText().toString();
+                        String namaBarang = mNamaTextView.getText().toString();
+                        String total = String.valueOf(qty);
 
-                Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
-                intent.putExtra("sms_body",message);
-                startActivity(intent);
+                        final String message = "Saya pesan " + namaBarang + " sebanyak " + total + " porsi. dikirim ke : " + alamat + "\n\n Penerima : " + namaPemesan;
+
+                        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+                        intent.putExtra("sms_body",message);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             @Override
