@@ -27,6 +27,7 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.dtrescatering.base.Item;
@@ -153,7 +154,6 @@ public class StoreActivity extends AppCompatActivity {
                 }
 
                 String item = mData.get(position).toString();
-                Toast.makeText(getApplicationContext(), item, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -218,15 +218,23 @@ public class StoreActivity extends AppCompatActivity {
         name.setText(selectedItem.getNama());
         final EditText price = (EditText) view.findViewById(R.id.editText__dialog_item_harga);
         price.setText(selectedItem.getHarga());
+        final TextView textView = (TextView) view.findViewById(R.id.textView4);
+        textView.setVisibility(View.GONE);
+        image = (ImageButton) view.findViewById(R.id.imageButton_dialog_item_gambar);
+        image.setVisibility(View.GONE);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items");
 
         builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialogInterface, int i) {
-                mDatabaseRef.child(currentItemId).setValue(new Item(
-                        name.getText().toString(), price.getText().toString()
-                ));
+                DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items").child(currentItemId);
+
+                Map<String, Object> values = new HashMap<String, Object>();
+                values.put("nama", name.getText().toString());
+                values.put("harga", price.getText().toString());
+
+                reference.updateChildren(values);
                 mActionMode.finish();
             }
         });
