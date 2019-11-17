@@ -9,8 +9,14 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ActionMode.Callback;
@@ -18,11 +24,15 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.dtrescatering.base.Item;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,10 +42,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.android.dtrescatering.base.MethodeFunction.longToast;
 import static com.android.dtrescatering.base.MethodeFunction.shortToast;
@@ -47,8 +64,14 @@ public class StoreActivity extends AppCompatActivity {
     private View mEmptyView;
     private ItemStoreAdapter mAdapter;
 
+    private static final int PICK_IMAGE_REQUEST = 101;
+
     private ArrayList<Item> mData;
     private ArrayList<String> mDataId;
+
+    private Uri mImageUri;
+
+    private ImageButton image;
 
     private ActionMode mActionMode;
 
@@ -256,6 +279,9 @@ public class StoreActivity extends AppCompatActivity {
     }
 
     private void saveItem() {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        final StorageReference reference = storage.getReference();
+
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         final View view = layoutInflater.inflate(R.layout.dialog_item_store, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -264,9 +290,14 @@ public class StoreActivity extends AppCompatActivity {
 
         final EditText name = (EditText) view.findViewById(R.id.editText_dialog_item_nama);
         final EditText price = (EditText) view.findViewById(R.id.editText__dialog_item_harga);
+        image = (ImageButton) view.findViewById(R.id.imageButton_dialog_item_gambar);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items");
         final String dataID = mDatabaseRef.push().getKey();
+
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Upload Item");
+        progressDialog.show();
 
         builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
             @Override
@@ -274,8 +305,45 @@ public class StoreActivity extends AppCompatActivity {
                 mDatabaseRef.child(dataID).setValue(new Item(name.getText().toString(), price.getText().toString())).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+
+                        //kodignan tambah gambar
+                        StorageReference ref = reference.child("Items/" + name.getText().toString() + System.currentTimeMillis() + "." + getFileExtention(mImageUri));
+                        ref.putFile(mImageUri)
+                                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items").child(dataID);
+
+                                        Map<String, Object> values = new HashMap<String, Object>();
+                                        values.put("gambar", name.getText().toString() + System.currentTimeMillis() + "." + getFileExtention(mImageUri));
+
+                                        databaseReference.updateChildren(values);
+
+                                        progressDialog.dismiss();
+
+//                                        longToast(getApplicationContext(), "Berhasil Membuat Toko");
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        progressDialog.dismiss();
+                                        longToast(getApplicationContext(), "Gagal Upload : " + e.toString());
+                                    }
+                                })
+                                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                                        double progress = (100.0 * taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                                        progressDialog.setMessage("Uploading " + (int)progress + "%");
+//                                        shortToast(getApplicationContext(), "Berhasil Menyimpan Data");
+                                    }
+                                });
+
+                        //------------------------
+
                         dialogInterface.dismiss();
-                        shortToast(getApplicationContext(), "Berhasil Menyimpan Data");
                     }
                 });
             }
@@ -289,9 +357,61 @@ public class StoreActivity extends AppCompatActivity {
         });
 
         builder.show();
+
+
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mOpenFilePicker();
+            }
+        });
     }
 
-//    private ArrayList<String> getStoreId() {
+    private void mOpenFilePicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        Intent sIntent = new Intent("com.sec.android.app.myfiles.PICK_DATA");
+        sIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        Intent chooserIntent;
+        if (getPackageManager().resolveActivity(sIntent, 0) != null) {
+            chooserIntent = Intent.createChooser(sIntent, "Open File");
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {intent});
+        } else {
+            chooserIntent = Intent.createChooser(intent, "Open file");
+        }
+        try {
+            startActivityForResult(chooserIntent, PICK_IMAGE_REQUEST);
+        } catch (android.content.ActivityNotFoundException e) {
+//                methodeFunction.toastMessage(RegisterStoreActivity.this, getString(R.string.warning_open_file_chooser));
+
+        }
+    }
+
+    private String getFileExtention(Uri uri){
+        ContentResolver cR = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cR.getType(uri));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case PICK_IMAGE_REQUEST:
+                    mImageUri = data.getData();
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), mImageUri);
+                        image.setImageBitmap(bitmap);
+                    } catch (IOException e) {
+                        longToast(getApplicationContext(), e.toString());
+                    }
+                    break;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    //    private ArrayList<String> getStoreId() {
 //        return
 //    }
 
