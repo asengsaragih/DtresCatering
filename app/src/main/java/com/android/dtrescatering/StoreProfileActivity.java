@@ -21,6 +21,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -93,6 +94,7 @@ public class StoreProfileActivity extends AppCompatActivity {
         mJamTextView = findViewById(R.id.textView__store_detail_jam);
 
         mShowItem(savedInstanceState);
+        mShowHeader(savedInstanceState);
     }
 
     private void mShowItem(Bundle bundle) {
@@ -136,5 +138,29 @@ public class StoreProfileActivity extends AppCompatActivity {
         } else {
             return storeId = (String) savedInstanceState.getSerializable("storeId");
         }
+    }
+
+    private void mShowHeader(Bundle bundle) {
+        String storeId = getStoreId(bundle);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Stores").child(storeId);
+
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String deskripsi = dataSnapshot.child("deskripsi").getValue(String.class);
+                String nama = dataSnapshot.child("nama").getValue(String.class);
+                String jamBuka = dataSnapshot.child("jamBuka").getValue(String.class);
+                String jamTutup = dataSnapshot.child("jamTutup").getValue(String.class);
+
+                mNamaTextView.setText(nama);
+                mDescTextView.setText(deskripsi);
+                mJamTextView.setText("Buka Mulai : " + jamBuka + " - " + jamTutup);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 }
