@@ -38,6 +38,7 @@ import static com.android.dtrescatering.base.MethodeFunction.longToast;
 public class MainActivity extends AppCompatActivity {
 
     //tes upload branch baru
+    //tes upload branch baru
 
     int[] sampleImages = {
             R.drawable.img_slider_nasi_goreng,
