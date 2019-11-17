@@ -1,7 +1,11 @@
 package com.android.dtrescatering.base;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.widget.Toast;
+
+import androidx.core.app.ActivityCompat;
 
 public class MethodeFunction {
     public static void longToast(Context context, String message) {

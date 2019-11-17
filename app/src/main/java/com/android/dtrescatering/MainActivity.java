@@ -1,17 +1,25 @@
 package com.android.dtrescatering;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 
+import com.android.dtrescatering.base.Item;
 import com.android.dtrescatering.base.Session;
+import com.android.dtrescatering.base.Store;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -19,6 +27,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageListener;
+
+import java.util.ArrayList;
 
 import static com.android.dtrescatering.base.MethodeFunction.longToast;
 
@@ -36,10 +46,58 @@ public class MainActivity extends AppCompatActivity {
 
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+    private RecyclerView mStoreRecycleView;
+    private View mEmptyView;
+    private StoresAdapter mAdapter;
+
+    private ArrayList<Store> mData;
+    private ArrayList<String> mDataId;
+
+    private ActionMode mActionMode;
+
+    private DatabaseReference mDatabase;
+
+    private ChildEventListener childEventListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            mData.add(dataSnapshot.getValue(Store.class));
+            mDataId.add(dataSnapshot.getKey());
+            mAdapter.updateEmptyView();
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            int pos = mDataId.indexOf(dataSnapshot.getKey());
+            mData.set(pos, dataSnapshot.getValue(Store.class));
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+            int pos = mDataId.indexOf(dataSnapshot.getKey());
+            mDataId.remove(pos);
+            mData.remove(pos);
+            mAdapter.updateEmptyView();
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) { }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) { }
+    };
+
+    private DatabaseReference mDatabaseRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mStoreRecycleView = findViewById(R.id.recycleView_main_stores);
+        mEmptyView = findViewById(R.id.textView_main_empty_view);
 
         session = new Session(this);
         if (!session.loggedIn()){
@@ -48,6 +106,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mShowCarousel();
+    }
+
+    private void mShowStores() {
+        mData = new ArrayList<>();
+        mDataId = new ArrayList<>();
+        mDatabase = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");;
+        mDatabase.addChildEventListener(childEventListener);
+        //baru sampai dini ---------------------------------------
     }
 
     private void mShowCarousel() {
@@ -91,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkStoreExist() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference check = reference.child("Users").child(userId).child("store");
+        DatabaseReference check = reference.child("Users").child(userId).child("storeId");
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Mengecek Toko");

@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -48,7 +49,9 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.android.dtrescatering.base.MethodeFunction.longToast;
@@ -150,8 +153,14 @@ public class RegisterStoreActivity extends AppCompatActivity {
     }
 
     private void saveStore() {
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("store");
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Stores");
         final String dataID = mDatabaseRef.push().getKey();
+//        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("store");
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(userId);
+
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("storeId", dataID);
 
         Store store = new Store(
                 mNamaTokoEditText.getText().toString().trim(),
@@ -173,6 +182,8 @@ public class RegisterStoreActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        ref.updateChildren(values);
     }
 
 
