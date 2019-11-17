@@ -52,7 +52,7 @@ public class StoresAdapter extends RecyclerView.Adapter<StoresAdapter.ViewHolder
         Store store = mData.get(position);
         holder.namaTextView.setText(store.getNama());
         holder.deskripsiTextView.setText(store.getDeskripsi());
-        holder.jamBukaTextView.setText(store.getJamBuka());
+        holder.jamBukaTextView.setText(store.getJamBuka() + " - ");
         holder.jamTutupTextView.setText(store.getJamTutup());
         holder.itemView.setSelected(mSelectedId.contains(mDataId.get(position)));
     }

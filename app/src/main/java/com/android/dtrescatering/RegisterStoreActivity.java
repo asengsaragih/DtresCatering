@@ -174,7 +174,7 @@ public class RegisterStoreActivity extends AppCompatActivity {
         progressDialog.setTitle("Membuat Toko");
         progressDialog.show();
 
-        mDatabaseRef.child(dataID).setValue(store).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mDatabaseRef.child(userId).setValue(store).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 progressDialog.dismiss();

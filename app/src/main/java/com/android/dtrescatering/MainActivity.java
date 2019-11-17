@@ -5,6 +5,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
@@ -14,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.android.dtrescatering.base.Item;
 import com.android.dtrescatering.base.Session;
@@ -106,14 +109,47 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mShowCarousel();
+
+        mShowStores();
     }
 
     private void mShowStores() {
         mData = new ArrayList<>();
         mDataId = new ArrayList<>();
-        mDatabase = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");;
+        mDatabase = FirebaseDatabase.getInstance().getReference("Stores");
         mDatabase.addChildEventListener(childEventListener);
-        //baru sampai dini ---------------------------------------
+
+        mStoreRecycleView.setHasFixedSize(true);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mStoreRecycleView.setLayoutManager(linearLayoutManager);
+
+        DividerItemDecoration divider = new DividerItemDecoration(this, linearLayoutManager.getOrientation());
+//        mStoreRecycleView.addItemDecoration(divider);
+
+        mAdapter = new StoresAdapter(this, mData, mDataId, mEmptyView, new StoresAdapter.ClickHandler() {
+            @Override
+            public void onItemClick(int position) {
+                if (mActionMode != null) {
+                    mAdapter.toggleSelection(mDataId.get(position));
+                    if (mAdapter.selectionCount() == 0)
+                        mActionMode.finish();
+                    else
+                        mActionMode.invalidate();
+                    return;
+                }
+
+                String item = mData.get(position).toString();
+                Toast.makeText(getApplicationContext(), item, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public boolean onItemLongClick(int position) {
+                return false;
+            }
+        });
+
+        mStoreRecycleView.setAdapter(mAdapter);
     }
 
     private void mShowCarousel() {

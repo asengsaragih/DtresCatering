@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ActionMode.Callback;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +30,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 import java.util.ArrayList;
@@ -97,13 +99,13 @@ public class StoreActivity extends AppCompatActivity {
         mButtonClicked();
 
         mShowItem();
-
     }
 
     private void mShowItem() {
         mData = new ArrayList<>();
         mDataId = new ArrayList<>();
-        mDatabase = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");;
+
+        mDatabase = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items");;
         mDatabase.addChildEventListener(childEventListener);
 
         mStoreItemRecycleView.setHasFixedSize(true);
@@ -135,7 +137,6 @@ public class StoreActivity extends AppCompatActivity {
                 if (mActionMode != null) return false;
 
                 mAdapter.toggleSelection(mDataId.get(position));
-//                mActionMode = StoreActivity.this.startSupportActionMode(mActionModeCallback);
                 mActionMode = StoreActivity.this.startSupportActionMode(mActionModeCallback);
                 return true;
             }
@@ -194,7 +195,7 @@ public class StoreActivity extends AppCompatActivity {
         final EditText price = (EditText) view.findViewById(R.id.editText__dialog_item_harga);
         price.setText(selectedItem.getHarga());
 
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items");
 
         builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
             @Override
@@ -221,7 +222,7 @@ public class StoreActivity extends AppCompatActivity {
         final ArrayList<String> selectedIds = mAdapter.getSelectedId();
         int message = selectedIds.size() == 1 ? R.string.delete_item : R.string.delete_items;
 
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setMessage(message)
@@ -263,7 +264,7 @@ public class StoreActivity extends AppCompatActivity {
         final EditText name = (EditText) view.findViewById(R.id.editText_dialog_item_nama);
         final EditText price = (EditText) view.findViewById(R.id.editText__dialog_item_harga);
 
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items");
         final String dataID = mDatabaseRef.push().getKey();
 
         builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
