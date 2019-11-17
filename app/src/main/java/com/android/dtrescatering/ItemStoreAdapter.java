@@ -4,9 +4,12 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.dtrescatering.base.Item;
+import com.bumptech.glide.Glide;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -50,6 +53,7 @@ public class ItemStoreAdapter extends RecyclerView.Adapter<ItemStoreAdapter.View
         Item item = mData.get(position);
         holder.nameTextView.setText(item.getNama());
         holder.priceTextView.setText(item.getHarga());
+        Picasso.get().load(item.getGambar()).into(holder.itemImageView);
         holder.itemView.setSelected(mSelectedId.contains(mDataId.get(position)));
     }
 
@@ -84,11 +88,13 @@ public class ItemStoreAdapter extends RecyclerView.Adapter<ItemStoreAdapter.View
             View.OnLongClickListener {
         final TextView nameTextView;
         final TextView priceTextView;
+        final ImageView itemImageView;
 
         ViewHolder(View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.textView_item_store_nama);
             priceTextView = itemView.findViewById(R.id.textView_item_store_harga);
+            itemImageView = itemView.findViewById(R.id.imageView2);
 
             itemView.setFocusable(true);
             itemView.setOnClickListener(this);

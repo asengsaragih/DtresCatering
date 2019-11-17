@@ -305,8 +305,8 @@ public class StoreActivity extends AppCompatActivity {
         final String dataID = mDatabaseRef.push().getKey();
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
-//        progressDialog.setTitle("Upload Item");
-//        progressDialog.show();
+        progressDialog.setTitle("Upload Item");
+        progressDialog.show();
 
         builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
             @Override
@@ -314,31 +314,8 @@ public class StoreActivity extends AppCompatActivity {
                 mDatabaseRef.child(dataID).setValue(new Item(name.getText().toString(), price.getText().toString())).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-
-                        //kodignan tambah gambar
                         final StorageReference ref = reference.child("Items/" + name.getText().toString() + System.currentTimeMillis() + "." + getFileExtention(mImageUri));
                         ref.putFile(mImageUri)
-//                        ref.getDownloadUrl()
-//                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                                    @Override
-//                                    public void onSuccess(Uri uri) {
-//                                        String downloadUrl = uri.toString();
-//                                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Stores").child(userId).child("items").child(dataID);
-//                                        Map<String, Object> values = new HashMap<String, Object>();
-//                                        values.put("gambar", uri.toString());
-//
-//                                        databaseReference.updateChildren(values);
-//
-//                                        longToast(getApplicationContext(), "Berhasil Membuat Item");
-//                                    }
-//                                })
-//                                .addOnFailureListener(new OnFailureListener() {
-//                                    @Override
-//                                    public void onFailure(@NonNull Exception e) {
-//                                        longToast(getApplicationContext(), "Gagal Upload : " + e.toString());
-//                                    }
-//                                });
-//                                .ad
                                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -353,6 +330,7 @@ public class StoreActivity extends AppCompatActivity {
                                                 values.put("gambar", imageUrl);
                                                 databaseReference.updateChildren(values);
                                                 progressDialog.dismiss();
+                                                shortToast(getApplicationContext(), "Berhasil Upload Data");
                                             }
                                         });
                                     }
@@ -369,7 +347,6 @@ public class StoreActivity extends AppCompatActivity {
                                     public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
                                         double progress = (100.0 * taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
                                         progressDialog.setMessage("Uploading " + (int)progress + "%");
-//                                        shortToast(getApplicationContext(), "Berhasil Menyimpan Data");
                                     }
                                 });
 

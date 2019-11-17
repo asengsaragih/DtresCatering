@@ -5,25 +5,16 @@ import com.google.firebase.database.Exclude;
 public class Item {
     private String nama;
     private String harga;
+    private String gambar;
     private String key;
 
-    public String getImage() {
-        return image;
+    public Item() {
     }
 
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    private String image;
-
-    public Item(String nama, String harga, String image) {
+    public Item(String nama, String harga, String gambar) {
         this.nama = nama;
         this.harga = harga;
-        this.image = image;
-    }
-
-    public Item() {
+        this.gambar = gambar;
     }
 
     public Item(String nama, String harga) {
@@ -55,5 +46,13 @@ public class Item {
 
     public void setHarga(String harga) {
         this.harga = harga;
+    }
+
+    public String getGambar() {
+        return gambar;
+    }
+
+    public void setGambar(String gambar) {
+        this.gambar = gambar;
     }
 }
