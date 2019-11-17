@@ -180,9 +180,68 @@ public class StoreActivity extends AppCompatActivity {
     };
 
     private void editItem() {
+        final String currentItemId = mAdapter.getSelectedId().get(0);
+        Item selectedItem = mData.get(mDataId.indexOf(currentItemId));
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        final View view = layoutInflater.inflate(R.layout.dialog_item_store, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(view);
+        builder.setTitle("Edit Item Toko");
+
+        final EditText name = (EditText) view.findViewById(R.id.editText_dialog_item_nama);
+        name.setText(selectedItem.getNama());
+        final EditText price = (EditText) view.findViewById(R.id.editText__dialog_item_harga);
+        price.setText(selectedItem.getHarga());
+
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");
+
+        builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialogInterface, int i) {
+                mDatabaseRef.child(currentItemId).setValue(new Item(
+                        name.getText().toString(), price.getText().toString()
+                ));
+                mActionMode.finish();
+            }
+        });
+
+        builder.setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                mActionMode.finish();
+            }
+        });
+
+        builder.show();
     }
 
     private void deleteItem() {
+        final ArrayList<String> selectedIds = mAdapter.getSelectedId();
+        int message = selectedIds.size() == 1 ? R.string.delete_item : R.string.delete_items;
+
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("items");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setMessage(message)
+                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        for (String currentPetId : selectedIds) {
+                            mDatabaseRef.child(currentPetId).removeValue();
+                        }
+                        mActionMode.finish();
+                    }
+                })
+                .setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        mActionMode.finish();
+                    }
+                });
+        builder.create().show();
     }
 
     private void mButtonClicked() {

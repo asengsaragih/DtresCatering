@@ -5,4 +5,6 @@
     <string name="loading">Loading</string>
     <string name="edit">Edit</string>
     <string name="delete">Hapus</string>
+    <string name="delete_item">Hapus Item?</string>
+    <string name="delete_items">Hapus Item Yang Terpilih?</string>
 </resources>
